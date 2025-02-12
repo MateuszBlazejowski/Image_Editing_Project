@@ -12,6 +12,7 @@ using MinImage.ImageProcessing;
 using MinImage.ImageGenerating;
 using MinImage.AdditionalFuncionalities;
 using MinImage;
+using System.Security.Cryptography;
 
 namespace Frontend
 {
@@ -32,6 +33,7 @@ namespace Frontend
         private ConcurrentDictionary<int, Picture> _imageDictionary;
 
         private readonly CancellationToken _cancellationToken;
+        private string? path = null;
 
         public CommandProcessor(CancellationToken cancellationToken)
         {
@@ -117,6 +119,15 @@ namespace Frontend
                 PrintHelp();
                 return false;
             }
+            if (commands.Count() == 1)
+            {
+                var _commands = input.Split(' ', StringSplitOptions.TrimEntries);
+                if (_commands.Count() == 2 && _commands[0] == "ChangePath")
+                {
+                    ChangePath(_commands[1]);
+                    return false;
+                }
+            }
             int commandCount = _commandChainValidator.ValidateCommandChain(input, out imagesCount);
             if (commandCount == -1)
             {
@@ -128,7 +139,7 @@ namespace Frontend
             // Initialize image dictionary and progress workers
             for (int i = 0; i < imagesCount; i++)
             {
-                _imageDictionary.TryAdd(i, null);
+                _imageDictionary.TryAdd(i, new Picture());
             }
             _progressReporter.InitializeWorkers(imagesCount, commandCount);
 
@@ -150,10 +161,10 @@ namespace Frontend
 
             if (!_cancellationToken.IsCancellationRequested)
             {
-                _saver.SaveAllImages(_imageDictionary);
+                _saver.SaveAllImages(_imageDictionary, path);
             }
 
-            Console.CursorVisible =  true;
+            Console.CursorVisible = true;
             return true;
 
         }
@@ -181,15 +192,17 @@ namespace Frontend
             var parts = command.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length == 0) return false;
 
+
+
             return parts[0] switch
             {
                 "Generate" => await ProcessGenerateCommandAsync(imageId, parts, token),
                 "Input" => await ProcessInputCommandAsync(imageId, parts, token),
-                "Blur" => await ProcessBlurCommandAsync(imageId, parts, picture?.Image, token),
-                "RandomCircles" => await ProcessRandomCirclesCommandAsync(imageId, parts, picture?.Image, token),
-                "ColorCorrection" => await ProcessColorCorrectionCommandAsync(imageId, parts, picture?.Image, token),
-                "GammaCorrection" => await ProcessGammaCorrectionCommandAsync(imageId, parts, picture?.Image, token),
-                "Room"=> await ProcessRoomCommandAsync(imageId, parts, picture?.Image, token),
+                "Blur" => await ProcessBlurCommandAsync(imageId, parts, picture.Image, token),
+                "RandomCircles" => await ProcessRandomCirclesCommandAsync(imageId, parts, picture.Image, token),
+                "ColorCorrection" => await ProcessColorCorrectionCommandAsync(imageId, parts, picture.Image, token),
+                "GammaCorrection" => await ProcessGammaCorrectionCommandAsync(imageId, parts, picture.Image, token),
+                "Room" => await ProcessRoomCommandAsync(imageId, parts, picture.Image, token),
                 "Output" => await ProcessOutputCommandAsync(imageId, parts, picture, token),
                 "Help" => false,
                 _ => throw new InvalidOperationException($"Unknown command: {parts[0]}")
@@ -216,7 +229,7 @@ namespace Frontend
             return Task.FromResult(true);
         }
 
-        private Task<bool> ProcessBlurCommandAsync(int imageId, string[] parts, ImSh.Image<Rgba32> image, CancellationToken token)
+        private Task<bool> ProcessBlurCommandAsync(int imageId, string[] parts, ImSh.Image<Rgba32>? image, CancellationToken token)
         {
             if (parts.Length != 3 ||
                 !int.TryParse(parts[1], out int blurWidth) ||
@@ -247,7 +260,7 @@ namespace Frontend
             return Task.FromResult(true);
         }
 
-        private Task<bool> ProcessRandomCirclesCommandAsync(int imageId, string[] parts, ImSh.Image<Rgba32> image, CancellationToken token)
+        private Task<bool> ProcessRandomCirclesCommandAsync(int imageId, string[] parts, ImSh.Image<Rgba32>? image, CancellationToken token)
         {
             if (parts.Length != 3 ||
                 !int.TryParse(parts[1], out int numCircles) ||
@@ -277,7 +290,7 @@ namespace Frontend
             return Task.FromResult(true);
         }
 
-        private Task<bool> ProcessColorCorrectionCommandAsync(int imageId, string[] parts, Image<Rgba32> image, CancellationToken token)
+        private Task<bool> ProcessColorCorrectionCommandAsync(int imageId, string[] parts, Image<Rgba32>? image, CancellationToken token)
         {
             if (parts.Length != 4 ||
                 !float.TryParse(parts[1], out float red) ||
@@ -308,7 +321,7 @@ namespace Frontend
             return Task.FromResult(true);
         }
 
-        private Task<bool> ProcessGammaCorrectionCommandAsync(int imageId, string[] parts, Image<Rgba32> image, CancellationToken token)
+        private Task<bool> ProcessGammaCorrectionCommandAsync(int imageId, string[] parts, Image<Rgba32>? image, CancellationToken token)
         {
             if (parts.Length != 2 || !float.TryParse(parts[1], out float gamma))
             {
@@ -336,7 +349,7 @@ namespace Frontend
             return Task.FromResult(true);
         }
 
-        private Task<bool> ProcessRoomCommandAsync(int imageId, string[] parts, Image<Rgba32> image, CancellationToken token)
+        private Task<bool> ProcessRoomCommandAsync(int imageId, string[] parts, Image<Rgba32>? image, CancellationToken token)
         {
             if (parts.Length != 5 ||
                 !float.TryParse(parts[1], out float x1) ||
@@ -452,32 +465,52 @@ namespace Frontend
                 return Task.FromResult(false);
             }
         }
+
+        private void ChangePath(string _path)
+        {
+            if (Directory.Exists(_path))
+            {
+                path = _path;
+                Console.WriteLine("New path set");
+            }
+            else
+            {
+                Console.WriteLine("Directory does not exist, aborting...");
+            }
+        }
         private void PrintHelp()
         {
-            Console.WriteLine("List of available commands:");
-            Console.WriteLine();
-            Console.WriteLine("Generating commands:");
-            Console.WriteLine();
-            Console.WriteLine("Generate <imagesnumber> <width> <height> - Generate an image of the specified size.");
-            Console.WriteLine("Input <file_name> - Load an image from the output folder with the given name.");
-            Console.WriteLine();
-            Console.WriteLine("Processing commands:");
-            Console.WriteLine();
-            Console.WriteLine("Blur <width> <height> - Apply a blur effect to the image.");
-            Console.WriteLine("Output <filename_prefix> - Save the image with the given filename prefix.");
-            Console.WriteLine("RandomCircles <numCircles> <radius> - Add random circles to the image.");
-            Console.WriteLine("ColorCorrection <red> <green> <blue> - Apply color correction by adding red, green, and blue values.");
-            Console.WriteLine("GammaCorrection <gamma> - Apply gamma correction with the specified gamma value.");
-            Console.WriteLine("Room <x1> <y1> <x2> <y2> - Draw a filled rectangle with the given coordinates, given form 0 to 1");
-            Console.WriteLine();
-            Console.WriteLine("Command syntax should be as follows:");
-            Console.WriteLine("<Generating command> | <Processing Comand> | <Processing Comand>");
-            Console.WriteLine();
-            Console.WriteLine("Generating command at the beggining is mandatory, all following commands are not, however only one Generating command is allowed");
-            Console.WriteLine("Next Commands should be typed after '|', number of processing commands is not limited");
-            Console.WriteLine();
-            Console.WriteLine("During excution, press x to abort and terminate the program");
+            Console.WriteLine(@"
+List of available commands:
+
+Generating commands:
+
+Generate <imagesnumber> <width> <height> - Generate an image of the specified size.
+Input <file_name> - Load an image from the output folder with the given name.
+
+Processing commands:
+
+Blur <width> <height> - Apply a blur effect to the image.
+Output <filename_prefix> - Save the image with the given filename prefix.
+RandomCircles <numCircles> <radius> - Add random circles to the image.
+ColorCorrection <red> <green> <blue> - Apply color correction by adding red, green, and blue values.
+GammaCorrection <gamma> - Apply gamma correction with the specified gamma value.
+Room <x1> <y1> <x2> <y2> - Draw a filled rectangle with the given coordinates, given form 0 to 1.
+
+Command syntax should be as follows:
+<Generating command> | <Processing Command> | <Processing Command>
+
+Generating command at the beginning is mandatory, all following commands are not, however, only one generating command is allowed.
+Next commands should be typed after '|', the number of processing commands is not limited.
+
+During execution, press 'x' to abort and terminate the program.
+
+Other commands:
+
+ChangePath ""path"" - Set the path to the folder where images will be saved (default: in the binaries of MinImage).
+");
         }
+
 
     }
 }

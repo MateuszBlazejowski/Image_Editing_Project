@@ -20,7 +20,7 @@ namespace MinImage.ImageProcessing
         [DllImport("ImageGenerator.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern void Blur(nint texture, int width, int height, int blurWidth, int blurHeight, ProgressCallback callback);
 
-        public event Action<int, int> ProgressUpdated; // Event for progress updates
+        public event Action<int, int>? ProgressUpdated; // Event for progress updates
 
         /// <summary>
         /// Blurs the given image using the C++ library.

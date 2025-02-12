@@ -35,7 +35,7 @@ namespace MinImage.ImageProcessing
             ProgressCallback callback // Progress callback function
         );
 
-        public event Action<int, int> ProgressUpdated; // Event for progress updates
+        public event Action<int, int>? ProgressUpdated; // Event for progress updates
 
         /// <summary>
         /// Draws random circles on the given image using the C++ library.
@@ -58,7 +58,6 @@ namespace MinImage.ImageProcessing
 
             try
             {
-                // Initialize circle data
                 var random = new Random();
                 var circles = new Circle[numCircles];
                 for (int i = 0; i < numCircles; i++)
@@ -95,7 +94,6 @@ namespace MinImage.ImageProcessing
                     return true;
                 };
 
-                // Call the updated DrawCircles function
                 DrawCircles(texture, image.Width, image.Height, circles, numCircles, callback);
 
                 unsafe

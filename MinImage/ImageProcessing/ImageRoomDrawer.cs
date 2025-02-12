@@ -23,7 +23,7 @@ namespace MinImage.ImageProcessing
             ModifyPixelCallback modifyCallback,
             ProgressCallback progressCallback);
 
-        public event Action<int, int> ProgressUpdated;
+        public event Action<int, int>? ProgressUpdated;
 
         private CancellationToken _token;
 

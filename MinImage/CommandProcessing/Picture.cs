@@ -12,10 +12,14 @@ namespace MinImage.CommandProcessing
 {
     public class Picture
     {
-        public Image<Rgba32> Image { get; set; }
-        public string FilePrefix { get; set; }
+        public Image<Rgba32>? Image { get; set; }
+        public string? FilePrefix { get; set; }
 
-        public Picture(Image<Rgba32> image, string filePrefix)
+        public Picture()
+        {
+            
+        }
+        public Picture(Image<Rgba32> image, string? filePrefix = "Pic")
         {
             Image = image;
             FilePrefix = filePrefix;

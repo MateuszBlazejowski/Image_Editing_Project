@@ -34,7 +34,6 @@ namespace Frontend
                 }
             });
 
-            // Rest of your main logic
             try
             {
                 while (!cts.Token.IsCancellationRequested)
@@ -49,8 +48,10 @@ namespace Frontend
                         break;
                     }
 
-                    // Your command processing logic here
-                    bool result = await commandProcessor.ProcessCommandAsync(input);
+                    if (input != null)
+                    {
+                        bool result = await commandProcessor.ProcessCommandAsync(input);
+                    }
                 }
             }
             finally

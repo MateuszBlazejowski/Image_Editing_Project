@@ -20,7 +20,7 @@ namespace MinImage
         [DllImport("ImageGenerator.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern void GammaCorrection(nint texture, int width, int height, float gamma, ProgressCallback callback);
 
-        public event Action<int, int> ProgressUpdated;
+        public event Action<int, int>? ProgressUpdated;
 
         public void ApplyGammaCorrection(Image<Rgba32> image, float gamma, int imageId, CancellationToken _token)
         {

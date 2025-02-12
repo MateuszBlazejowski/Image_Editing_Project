@@ -20,7 +20,7 @@ namespace MinImage
         [DllImport("ImageGenerator.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern void ColorCorrection(nint texture, int width, int height, float red, float green, float blue, ProgressCallback callback);
 
-        public event Action<int, int> ProgressUpdated;
+        public event Action<int, int>? ProgressUpdated;
 
         public void ApplyColorCorrection(Image<Rgba32> image, float red, float green, float blue, int imageId, CancellationToken _token)
         {
