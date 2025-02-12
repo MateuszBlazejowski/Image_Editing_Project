@@ -2,14 +2,14 @@
 
 ## Overview
 
-This project is an interactive image generator written in C# that utilizes a native C++ library for image processing. The application allows users to generate and manipulate images using a series of commands, which can be chained together using a pipe (`|`) character. The project was developed as part of a university coursework in advanced programming with a focus on interoperability.
+This project is an interactive image generator written in C# that utilizes a native C++ library for image processing. The application allows users to generate and manipulate images using a series of commands, which can be chained together. The project was developed as part of a university coursework.
 
 ## MANUAL: 
 
-1: Copy the repository
-2: Open the project in Visual Studio or other IDE
-3: Set MinImage as a startup project if not set already
-4: Run the project and type "Help" to see avaliable options 
+- 1: Copy the repository
+- 2: Open the project in Visual Studio or other IDE
+- 3: Set MinImage as a startup project if not set already
+- 4: Run the project and type "Help" to see avaliable options 
 
 ## Features
 
@@ -19,17 +19,17 @@ This project is an interactive image generator written in C# that utilizes a nat
 
 ### Generating Commands
 
-- **Input ****`filename`**: Loads an image from disk.
-- **Generate ****`n`**** ****`width`**** ****`height`**: Generates `n` images of the given `width` x `height` dimensions with random patterns using the native library.
+- **Input `filename`**: Loads an image from disk.
+- **Generate `n` `width` `height`**: Generates `n` images of the given `width` x `height` dimensions with random patterns using the native library.
 
 ### Processing Commands
 
-- **Output ****`filename_prefix`**: Saves the processed images to disk.
-- **Blur ****`w`**** ****`h`**: Applies a `w` x `h` blur to the images.
-- **RandomCircles ****`n`**** ****`r`**: Draws `n` circles with radius `r` at random positions.
-- **Room ****`x1`**** ****`y1`**** ****`x2`**** ****`y2`**: Draws a filled rectangle based on normalized coordinates (0 to 1).
-- **ColorCorrection ****`red`**** ****`green`**** ****`blue`**: Adjusts color balance.
-- **GammaCorrection ****`gamma`**: Applies gamma correction.
+- **Output `filename_prefix`**: Saves the processed images to disk.
+- **Blur `w`  `h`**: Applies a `w` x `h` blur to the images.
+- **RandomCircles `n`  `r`**: Draws `n` circles with radius `r` at random positions.
+- **Room `x1`  `y1`  `x2`  `y2`**: Draws a filled rectangle based on normalized coordinates (0 to 1).
+- **ColorCorrection `red`  `green`  `blue`**: Adjusts color balance.
+- **GammaCorrection `gamma`**: Applies gamma correction.
 
 ## Command Syntax
 
@@ -60,7 +60,16 @@ The user can press `x` during execution to stop the command chain safely. The sy
 
 ## Example outputs 
 
-Basic image without filters:
-![Alt text](exampleImages/default_1.jpeg)
+Basic image without filters:  
+(generated randomly by c++ native library)  
+
+<img src="exampleImages/default_5.jpeg" alt="Alt text" style="width: 500px; height: 500px;" />  
+    
+      
+
+Image after applying Blur, ColorCorrection (Red only) and RandomCircles commands: 
+
+<img src="exampleImages/default_1.jpeg" alt="Alt text" style="width: 500px; height: 500px;" />  
+
 
 
