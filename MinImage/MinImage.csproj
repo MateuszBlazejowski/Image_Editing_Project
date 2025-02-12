@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<PlatformTarget>x64</PlatformTarget>
+	</PropertyGroup>
+
+
+	<!-- Reference the ImageGenerator project (optional) -->
+	<ItemGroup>
+		<ProjectReference Include="..\ImageGenerator\ImageGenerator.vcxproj" />
+	</ItemGroup>
+
+	<!-- Copy ImageGenerator.dll to MinImage output directory -->
+	<Target Name="CopyImageGeneratorDll" AfterTargets="Build">
+		<Copy SourceFiles="$(SolutionDir)x64\Debug\ImageGenerator.dll" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" />
+
+	</Target>
+
+	<ItemGroup>
+		<!-- Reference for SixLabors.ImageSharp -->
+		<PackageReference Include="SixLabors.ImageSharp" Version="3.1.6" />
+	</ItemGroup>
+
+</Project>
