@@ -389,10 +389,17 @@ namespace Frontend
                 return false;
             }
 
-            // Construct the absolute path
-            string outputFolder = Path.Combine(Environment.CurrentDirectory, "Output");
-            // string filePath = Path.Combine(outputFolder, parts[1].Trim());
-            string filePath = parts[1];
+            string outputFolder;
+            if (path == null)
+            {
+                // Construct the absolute path
+                outputFolder = Path.Combine(Environment.CurrentDirectory);
+            }
+            else 
+            {
+                outputFolder = Path.Combine(path);
+            }
+            string filePath = Path.Combine(outputFolder + parts[1]);
             if (!File.Exists(filePath))
             {
                 Console.WriteLine($"Error: File '{filePath}' does not exist in the output folder.");
@@ -481,34 +488,36 @@ namespace Frontend
         private void PrintHelp()
         {
             Console.WriteLine(@"
-List of available commands:
+    List of available commands:
 
 Generating commands:
 
-Generate <imagesnumber> <width> <height> - Generate an image of the specified size.
-Input <file_name> - Load an image from the output folder with the given name.
+    Generate <imagesnumber> <width> <height> - Generate an image of the specified size.
+    Input <file_name> - Load an image from the output folder with the given name. 
+    (Type name only(with extension), not the whole path. The path is default or the one set using ChangePath command)
 
 Processing commands:
 
-Blur <width> <height> - Apply a blur effect to the image.
-Output <filename_prefix> - Save the image with the given filename prefix.
-RandomCircles <numCircles> <radius> - Add random circles to the image.
-ColorCorrection <red> <green> <blue> - Apply color correction by adding red, green, and blue values.
-GammaCorrection <gamma> - Apply gamma correction with the specified gamma value.
-Room <x1> <y1> <x2> <y2> - Draw a filled rectangle with the given coordinates, given form 0 to 1.
+    Blur <width> <height> - Apply a blur effect to the image.
+    RandomCircles <numCircles> <radius> - Add random circles to the image.
+    ColorCorrection <red> <green> <blue> - Apply color correction by adding red, green, and blue values.
+    GammaCorrection <gamma> - Apply gamma correction with the specified gamma value.
+    Room <x1> <y1> <x2> <y2> - Draw a filled rectangle with the given coordinates, given form 0 to 1.
+    Output <filename_prefix> - Save the image with the given filename prefix.
 
 Command syntax should be as follows:
-<Generating command> | <Processing Command> | <Processing Command>
+    <Generating command> | <Processing Command> | <Processing Command>
 
-Generating command at the beginning is mandatory, all following commands are not, however, only one generating command is allowed.
-Next commands should be typed after '|', the number of processing commands is not limited.
+    Generating command at the beginning is mandatory, all following commands are not,
+    however, only one generating command is allowed.
+    Next commands should be typed after '|', the number of processing commands is not limited.
 
-During execution, press 'x' to abort and terminate the program.
+    During execution, press 'x' to abort and terminate the program.
 
 Other commands:
 
-ChangePath ""path"" - Set the path to the folder where images will be saved (default: in the binaries of MinImage).
-");
+    ChangePath ""path"" - Set the path to the folder where images will be saved (default: in the binaries of MinImage).
+    ");
         }
 
 
