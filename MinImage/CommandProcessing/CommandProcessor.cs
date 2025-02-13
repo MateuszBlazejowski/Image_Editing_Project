@@ -390,6 +390,7 @@ namespace Frontend
             }
 
             string outputFolder;
+            string filePath;
             if (path == null)
             {
                 // Construct the absolute path
@@ -399,7 +400,14 @@ namespace Frontend
             {
                 outputFolder = Path.Combine(path);
             }
-            string filePath = Path.Combine(outputFolder + parts[1]);
+            if (outputFolder.Last() != '\\')
+            {
+                filePath = Path.Combine(outputFolder + "\\" + parts[1]);
+            }
+            else
+            { 
+                filePath = Path.Combine(outputFolder + parts[1]);
+            }
             if (!File.Exists(filePath))
             {
                 Console.WriteLine($"Error: File '{filePath}' does not exist in the output folder.");
