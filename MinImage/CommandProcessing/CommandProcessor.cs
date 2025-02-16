@@ -25,6 +25,7 @@ namespace Frontend
         private readonly ImageGammaCorrector _imageGammaCorrector;
         private readonly ImageColorCorrector _imageColorCorrector;
         private readonly ImageRoomDrawer _imageRoomDrawer;
+        private readonly MatrixFilterer _matrixFilterer;
 
 
         private readonly CommandChainValidator _commandChainValidator;
@@ -44,6 +45,7 @@ namespace Frontend
             _imageGammaCorrector = new ImageGammaCorrector();
             _imageColorCorrector = new ImageColorCorrector();
             _imageRoomDrawer = new ImageRoomDrawer();
+            _matrixFilterer = new MatrixFilterer();
 
 
             _commandChainValidator = new CommandChainValidator();
@@ -99,6 +101,14 @@ namespace Frontend
 
                 _progressReporter.UpdateWorkerProgress(imageId, progress, "Drawing Room...            ");
             };
+
+            _matrixFilterer.ProgressUpdated += (imageId, progress) =>
+            {
+                if (_cancellationToken.IsCancellationRequested)
+                    return;
+
+                _progressReporter.UpdateWorkerProgress(imageId, progress, "Applying Matrix Filter...         ");
+            };
         }
 
         public async Task<bool> ProcessCommandAsync(string input)
@@ -125,6 +135,11 @@ namespace Frontend
                 if (_commands.Count() == 2 && _commands[0] == "ChangePath")
                 {
                     ChangePath(_commands[1]);
+                    return false;
+                }
+                else if (commands[0] == "ChangePath")
+                {
+                    Console.WriteLine("Does your path containg blank spaces?");
                     return false;
                 }
             }
@@ -203,6 +218,7 @@ namespace Frontend
                 "ColorCorrection" => await ProcessColorCorrectionCommandAsync(imageId, parts, picture.Image, token),
                 "GammaCorrection" => await ProcessGammaCorrectionCommandAsync(imageId, parts, picture.Image, token),
                 "Room" => await ProcessRoomCommandAsync(imageId, parts, picture.Image, token),
+                "MatrixFilter" => await ProcessMatrixFilter(imageId, parts, picture.Image, token),
                 "Output" => await ProcessOutputCommandAsync(imageId, parts, picture, token),
                 "Help" => false,
                 _ => throw new InvalidOperationException($"Unknown command: {parts[0]}")
@@ -381,6 +397,35 @@ namespace Frontend
             return Task.FromResult(true);
         }
 
+        private Task<bool> ProcessMatrixFilter(int imageId, string[] parts, ImSh.Image<Rgba32>? image, CancellationToken token)
+        {
+            if (parts.Length != 1)
+            {
+                Console.WriteLine("Invalid syntax. Use: MatrixFilter");
+                return Task.FromResult(false);
+            }
+
+            if (image == null)
+            {
+                Console.WriteLine($"Error: Image with ID {imageId} is not initialized.");
+                return Task.FromResult(false);
+            }
+
+            try
+            {
+                // Apply blur and update progress
+                _matrixFilterer.ApplyMatrixFilter(image, imageId, token);
+                _progressReporter.CommandFinished(imageId);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error applying blur: {ex.Message}");
+                return Task.FromResult(false);
+            }
+
+            return Task.FromResult(true);
+        }
+
         private async Task<bool> ProcessInputCommandAsync(int imageId, string[] parts, CancellationToken token)
         {
             if (parts.Length != 2)
@@ -511,6 +556,7 @@ Processing commands:
     ColorCorrection <red> <green> <blue> - Apply color correction by adding red, green, and blue values.
     GammaCorrection <gamma> - Apply gamma correction with the specified gamma value.
     Room <x1> <y1> <x2> <y2> - Draw a filled rectangle with the given coordinates, given form 0 to 1.
+    MatrixFilter - apply colors palette from Matrix movie series.
     Output <filename_prefix> - Save the image with the given filename prefix.
 
 Command syntax should be as follows:
