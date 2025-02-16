@@ -10,6 +10,7 @@ namespace MinImage.CommandProcessing
             "Blur",        // Processing command
             "Output",      // Processing command
             "RandomCircles", // processing command
+            "MatrixFilter",
             "ColorCorrection",
             "GammaCorrection",
             "Room",
@@ -120,6 +121,7 @@ namespace MinImage.CommandProcessing
                 "GammaCorrection" => parts.Length == 2 && float.TryParse(parts[1], out _),
                 "Room" => parts.Length == 5 && float.TryParse(parts[1], out _) && float.TryParse(parts[2], out _) &&
                  float.TryParse(parts[3], out _) && float.TryParse(parts[4], out _),
+                 "MatrixFilter" => parts.Length == 1, 
                 _ => false
             };
         }
